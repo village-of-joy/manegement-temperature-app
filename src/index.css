@@ -1,13 +1,275 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.app {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
 }
+
+.dashboard {
+  display: flex;
+  flex-wrap: wrap; /* コンポーネントが画面からはみ出した場合に折り返す */
+  padding: 20px;
+  height: 100vh; /* 高さを100vhに設定 */
+  background-color: #f5f5f5;
+}
+
+/* グラフの設定 */
+.temperature-graph {
+  max-width: 100%;
+  max-height: 80%;
+}
+
+/* 記録データグラフ */
+.recorded-temperature-graph {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 70vh;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px; /* グラフ全体の余白 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column; /* タイトルとグラフを縦に並べる */
+  align-items: center;
+  justify-content: flex-start; /* タイトルを上部に配置 */
+  margin-bottom: 10px;
+} 
+
+.recorded-temperature-graph h2  {
+  margin-bottom: 15px; /* タイトル下にスペースを確保 */
+  font-size: 1.2rem;
+  color: #4bc0c0;
+  white-space: nowrap;
+  margin: 0px;
+}
+
+/* リアルタイム温度表示のデザイン */
+.temperature-display {
+  background-color: #ffffff; /* 背景を白に統一 */
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 320px;
+  margin: 20px auto;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  color: #333333; /* 文字色を落ち着いたダークグレー */
+}
+
+.temperature-display h2 {
+  font-size: 1.4em;
+  margin: 0;
+  padding-bottom: 10px;
+  color: #4bc0c0; /* 見出しに少し柔らかいダークグレー */
+}
+
+.temperature {
+  font-size: 2em; /* 温度表示を大きく */
+  font-weight: bold;
+  margin: 15px 0 0;
+  color: #ff3333; /* 温度を赤で強調 */
+  background-color: #ffffff; /* 温度部分の背景を白に */
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2); /* 内側にシャドウを付けてへこんだように */
+  display: inline-block; /* 温度部分がボックスのように見えるよう調整 */
+}
+
+.temperature::after {
+  content: ' °C'; /* 単位を表示 */
+  font-weight: normal;
+  font-size: 0.9em;
+  color: #777777; /* 単位の部分はやや控えめに */
+}
+
+
+/* RORのデザイン */
+.ror {
+  background-color: #ffffff; /* 背景を白に統一 */
+  padding: 15px;
+  border-radius: 10px;
+  max-width: 320px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.ror h2 {
+  font-size: 1.4em;
+  margin: 0;
+  padding-bottom: 10px;
+  color: #4bc0c0; /* 見出しに少し柔らかいダークグレー */
+}
+
+.ror-p {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 10px 0 0;
+  color: #ff3333; /* 数値を赤で強調 */
+  background-color: #ffffff; /* 数値部分の背景を白に */
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2); /* 内側にシャドウを付けてへこんだように */
+  display: inline-block; /* 数値部分がボックスのように見えるよう調整 */
+}
+
+.ror-p::after {
+  content: ' °C / 60秒'; /* 単位を表示 */
+  font-weight: normal;
+  font-size: 0.9em;
+  color: #777777; /* 単位の部分はやや控えめに */
+}
+
+
+
+/* ダッシュボードの配置設定（グラフ） */
+.graph-container {
+  width: 70%;  /* 幅を画面の50%に設定 */
+  max-height: 70vh; /* 高さを画面の50%に設定 */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-sizing: border-box; /* パディングを含む */
+  margin: 10px; /* マージンを追加してスペースを確保 */
+}
+
+/* データコンテナ（温度表示と記録データグラフの親コンテナ） */
+.data-container{
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  margin: 10px;
+  justify-content: space-around;
+  max-height: 70vh;
+}
+
+/* ダッシュボードの配置設定（温度表示） */
+.display-container {
+  width: 100%;  /* 幅を画面の50%に設定 */
+  height: 50%; /* 高さを画面の50%に設定 */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+  box-sizing: border-box; /* パディングを含む */
+  margin: 3px; /* マージンを追加してスペースを確保 */
+}
+
+.ror-container {
+  width: 100%;
+  height: 50%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+  box-sizing: border-box; /* パディングを含む */
+  margin: 3px; /* マージンを追加してスペースを確保 */
+}
+
+/* ダッシュボードの配置設定（記録データグラフ） */
+.Recorded-data-container {
+  width: 96%;  
+  max-height: auto; /* 最大の高さを80vhに設定 */
+  max-height: auto; /* 高さを100%に設定 */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding-bottom: 15px;
+  box-sizing: border-box; 
+  margin: 10px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 1.5em;
+  color: #4bc0c0;
+}
+
+.data-btn {
+  background-color: #4bc0c0; /* ボタンの背景色 */
+  color: #fff; /* ボタンの文字色 */
+  border: none; /* ボーダーなし */
+  border-radius: 5px; /* 角を丸くする */
+  padding: 10px 20px; /* 上下10px、左右20pxのパディング */
+  font-size: 1em; /* フォントサイズ */
+  cursor: pointer; /* カーソルをポインターに変更 */
+  transition: background-color 0.3s ease; /* ホバー時の色変更にトランジション */
+  margin-top: 5vh;
+}
+
+.data-btn:hover {
+  background-color: #0056b3; /* ホバー時の背景色 */
+}
+
+.data-btn:focus {
+  outline: none; /* フォーカス時のアウトラインを削除 */
+}
+
+/* スマートフォン表示用のスタイル */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column; /* 縦に並べる */
+    height: auto; /* 高さを自動調整 */
+    max-width: 100%;
+    padding: 0px;
+  }
+
+  .graph-container {
+    width: auto;
+    max-width: 100%; /* 幅を100%に設定 */
+    max-height: 200vh; /* 高さを自動調整 */
+    margin-bottom: 20px; /* 下部マージンを追加 */
+  }
+
+  .temperature-graph {
+    height: 50vh; /* 高さを少し調整 */
+    max-width: 100%;
+  }
+
+  .data-container {
+    width: auto;
+    flex-direction: column; /* 縦並びに変更 */
+    max-width: 100%;
+    padding-bottom: 12vh;
+  }
+
+  .display-container,
+  .Recorded-data-container {
+    max-width: 100%; /* 幅を100%に */
+    margin-bottom: 15px; /* 各コンテナ間の間隔を確保 */
+    padding: 15px;
+  }
+
+  .recorded-temperature-graph {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9; /* スマホ表示でつぶれを防ぐ */
+    padding: 15px;
+    max-height: 60vh;
+  }
+
+  .temperature-display h2,
+  .recorded-temperature-graph h2
+  .ror h2 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .temperature {
+    font-size: 2.5rem; /* 温度表示を見やすく */
+  }
+
+  .data-btn {
+    max-width: 100%; /* ボタンを幅いっぱいに */
+    padding: 10px;
+    font-size: 1em;
+    margin-top: 20px;
+  }
+}
+
+
+
