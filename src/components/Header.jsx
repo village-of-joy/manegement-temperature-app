@@ -1,9 +1,11 @@
 // src/components/Header.jsx
 import React, { useState } from 'react';
 import '../Header.css';
+import { useAuth } from 'react-oidc-context';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const auth = useAuth();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -20,7 +22,7 @@ const Header = () => {
       <nav className={`header__nav ${menuOpen ? 'header__nav--open' : ''}`}>
         <ul>
           <li><a href="#dashboard">ダッシュボード</a></li>
-          <li><a href="#contact">コンタクト</a></li>
+          <li onClick={() => auth.removeUser()}>Sign Out</li>
         </ul>
       </nav>
     </header>
