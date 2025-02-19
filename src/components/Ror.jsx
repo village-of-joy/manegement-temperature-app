@@ -7,8 +7,8 @@ const Ror = ({ data }) => {
   useEffect(() => {
     if (data.length > 1) {
       // 直近の2つのデータポイントから温度上昇率を計算
-      const lastTemp = data[data.length - 1];
-      const secondLastTemp = data[data.length - 2];
+      const lastTemp = data[data.length - 2];
+      const secondLastTemp = data[data.length - 3];
       const risePerSecond = lastTemp - secondLastTemp;
       
       // 1秒ごとの上昇率をもとに60秒間の予測上昇率を計算
