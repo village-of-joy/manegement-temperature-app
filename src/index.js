@@ -3,12 +3,22 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-// import { Amplify } from 'aws-amplify';
+import { AuthProvider } from 'react-oidc-context';
+
+const cognitoAuthConfig = {
+  authority: process.env.REACT_APP_AUTHORITY,
+  client_id: process.env.REACT_APP_CLIENT_ID,
+  redirect_uri: process.env.REACT_APP_REDIRECT_URL,
+  response_type: "code",
+  scope: "email openid phone",
+};
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider {...cognitoAuthConfig}>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );
 
