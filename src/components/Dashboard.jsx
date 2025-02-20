@@ -4,6 +4,7 @@ import TemperatureDisplay from './TemperatureDisplay';
 import RecordedTemperatureGraph from './RecordedTemperatureGraph';
 import Ror from './Ror';
 import { uploadJsonToS3 } from '../constants/upload'
+import { useAuth } from 'react-oidc-context';
 
 const Dashboard = () => {
   const [data, setData] = useState(createInitialData('温度 (°C)', 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.2)'));
@@ -13,6 +14,8 @@ const Dashboard = () => {
   const [currentTemperature, setCurrentTemperature] = useState(0);
   const [jsonData, setJsonData] = useState([]);
   const [markedPoints, setMarkedPoints] = useState([]);
+
+  const auth = useAuth();
 
   // 初期データを生成する関数
   function createInitialData(label, borderColor, backgroundColor) {
@@ -96,7 +99,7 @@ const Dashboard = () => {
 
   // データ取得開始ボタンのハンドラー
   const startRecording = () => {
-    setRecordedData(createInitialData('温度 (°C)', 'rgba(225, 55, 100, 1)', 'rgba(225, 55, 100, 0.2)'));
+    setRecordedData(createInitialData('温度 (°C)', 'rgba(225, 55, 100, 1)', 'rgba(225, 55, 100, 1)'));
     setTime(0);
     setMarkedPoints([]); // 印をリセット
     setIsRunning(true);
@@ -111,10 +114,27 @@ const Dashboard = () => {
       time: label,
       temperature: recordedData.datasets[0].data[index],
     }));
-
     setJsonData(jsonData);
-    uploadJsonToS3(jsonData, 'test/test.json')
-    console.log('データが保存されました：', JSON.stringify(jsonData));
+
+    // チェックポイントデータを統合
+    const finalJsonData = {
+      recordedData: jsonData,
+      markedPoints: markedPoints,
+    };
+
+    // ユーザにファイル名を入力させる
+    let userFileName = prompt("保存するファイル名を入力してください(拡張子不要)：");
+
+    // 入力がキャンセルされた場合
+    if (!userFileName) {
+      userFileName = `recording_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+    }
+
+    // ファイル名を`recoding_YYYYMMDD_HHMMSS.json`形式で自動生成
+    const fileName = `${userFileName}.json`
+
+    uploadJsonToS3(finalJsonData, `${auth.user?.profile?.["cognito:username"]}/${fileName}`)
+    console.log('データが保存されました：', JSON.stringify(finalJsonData));
   };
 
   // チェックポイントを追加
