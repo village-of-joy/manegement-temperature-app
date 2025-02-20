@@ -3,6 +3,7 @@ import TemperatureGraph from './TemperatureGraph';
 import TemperatureDisplay from './TemperatureDisplay';
 import RecordedTemperatureGraph from './RecordedTemperatureGraph';
 import Ror from './Ror';
+import { uploadJsonToS3 } from '../constants/upload'
 
 const Dashboard = () => {
   const [data, setData] = useState(createInitialData('温度 (°C)', 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.2)'));
@@ -112,6 +113,7 @@ const Dashboard = () => {
     }));
 
     setJsonData(jsonData);
+    uploadJsonToS3(jsonData, 'test/test.json')
     console.log('データが保存されました：', JSON.stringify(jsonData));
   };
 
