@@ -1,9 +1,13 @@
-import { createBrowserRouter } from "react-router-dom";
+import { Route, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 import App from '../App';
 import BluetoothComponent from '../components/conectedBluetooth';
 
-const Routes = createBrowserRouter([
-    { path: '/', element:<App/>},
-    { path: '/bluetooth', element:<BluetoothComponent/>},
-]);
+const Routes = createBrowserRouter(
+    createRoutesFromElements(
+        <>
+            <Route index element={<App />} />
+            <Route path='/bluetooth' element={<BluetoothComponent />} />
+        </>
+    )
+)
 export default Routes;
