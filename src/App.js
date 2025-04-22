@@ -32,7 +32,6 @@ function App() {
         <Header />
         <div className='dashboad'>
           <Dashboard />
-          <button onClick={() => auth.removeUser()}>Sign Out</button>
         </div>
       </div>  
     );
