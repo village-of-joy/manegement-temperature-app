@@ -1,14 +1,15 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+
+// S3クライアントの設定
+const s3 = new S3Client({
+    region: process.env.REACT_APP_AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+        secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY
+    }
+});
 
 export const fetchJsonFromS3 = async (dirName, fileName) => {
-    // S3クライアントの設定
-    const s3 = new S3Client({
-        region: process.env.REACT_APP_AWS_REGION,
-        credentials: {
-            accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-            secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY
-        }
-    });
 
     const bucketName = process.env.REACT_APP_AWS_S3_BUCKET_NAME;
     const keyName = `${dirName}/${fileName}`  // dirName/fileNameフォルダを指定
@@ -35,3 +36,16 @@ export const fetchJsonFromS3 = async (dirName, fileName) => {
         return null;
     }
 }
+
+export const listJsonFilesFromS3 = async (prefix) => {
+    const command = new ListObjectsV2Command({
+        Bucket: process.env.REACT_APP_AWS_S3_BUCKET_NAME,
+        Prefix: prefix,
+    });
+
+    const response = await s3.send(command);
+
+    return (response.Contents || [])
+        .filter(obj => obj.Key && obj.Key.endsWith('.json'))
+        .map(obj => obj.Key.replace(`${prefix}/`, ""));
+};

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import TemperatureGraph from './TemperatureGraph';
 import TemperatureDisplay from './TemperatureDisplay';
 import RecordedTemperatureGraph from './RecordedTemperatureGraph';
@@ -6,7 +6,7 @@ import BluetoothComponent from './conectedBluetooth';
 import Ror from './Ror';
 import { uploadJsonToS3 } from '../constants/upload'
 import { useAuth } from 'react-oidc-context';
-import { fetchJsonFromS3 } from '../constants/getObject';
+import { fetchJsonFromS3, listJsonFilesFromS3 } from '../constants/getObject';
 
 const Dashboard = () => {
   const [data, setData] = useState(createInitialData('温度 (°C)', 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.2)'));
@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [currentTemperature, setCurrentTemperature] = useState(0);
   const [fetchData, setFetchData] = useState([]);
   const [markedPoints, setMarkedPoints] = useState([]);
+  const [fileList, setFileList] = useState([]);
+  const [selectedFile, setSelectedFile] = useState("");
 
   const auth = useAuth();
 
@@ -156,21 +158,36 @@ const Dashboard = () => {
     }
   };
 
-  const handleFetchData = async () => {
+  // 保存しているJSONデータを選択し、取得。グラフに表示
+  // ユーザーのファイル一覧を取得
+  const listUserFiles = useCallback(async () => {
     try {
-      const data = await fetchJsonFromS3("test", "サンプル.json");
-      if (data) {
-        // データをログに直接出力（stateではなく取得したデータを使用）
-        setFetchData(data);
-        console.log("取得したデータ:", data);
-      } else {
-        console.error("データが取得できませんでした");
-        return null;
-      }
-    } catch (error) {
-      console.error("データ取得中にエラーが発生しました:", error);
+      const files = await listJsonFilesFromS3(`${auth.user?.profile?.["cognito:username"]}`);
+      setFileList(files);
+    } catch (err) {
+      console.error("ファイル一覧取得エラー：", err);
     }
-  }
+  }, [auth.user]);
+
+  // ファイルを選択してデータを取得
+  const handleFileSelect = async (e) => {
+    const fileName = e.target.value;
+    setSelectedFile(fileName);
+
+    try {
+      const data = await fetchJsonFromS3(`${auth.user?.profile?.["cognito:username"]}`, fileName);
+      if (data) {
+        setFetchData(data);
+      }
+    } catch (err) {
+      console.error("データ取得エラー：", err);
+    }
+  };
+
+  // useEffectでマウント時にファイル一覧取得
+  useEffect(() => {
+    listUserFiles();
+  }, [listUserFiles]);
 
   return (
     <div className="dashboard">
@@ -203,7 +220,13 @@ const Dashboard = () => {
       </div>
       {/* 記録されたデータのグラフ */}
       <div className='Recorded-data-container'>
-        <button onClick={handleFetchData}>データ取得</button>
+        <label>表示するファイルを選択：</label>
+        <select value={selectedFile} onChange={handleFileSelect}>
+          <option value="">ファイルを選択</option>
+          {fileList.map((file) => (
+            <option key={file} value={file}>{file}</option>
+          ))}
+        </select>
         <RecordedTemperatureGraph jsonData={fetchData} />
       </div>
     </div>
