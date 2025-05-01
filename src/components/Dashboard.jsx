@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import TemperatureGraph from './TemperatureGraph';
 import TemperatureDisplay from './TemperatureDisplay';
 import RecordedTemperatureGraph from './RecordedTemperatureGraph';
+import BluetoothComponent from './conectedBluetooth';
 import Ror from './Ror';
 import { uploadJsonToS3 } from '../constants/upload'
 import { useAuth } from 'react-oidc-context';
@@ -175,7 +176,9 @@ const Dashboard = () => {
           <Ror data={data.datasets[0].data} />
         </div>
       </div>
-
+      <div>
+        <BluetoothComponent />
+      </div>
       {/* 記録されたデータのグラフ */}
       <div className='Recorded-data-container'>
         <RecordedTemperatureGraph jsonData={jsonData} />
