@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Routes from './router/Router'
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from 'react-oidc-context';
-import { RouterProvider } from 'react-router-dom';
 
 const cognitoAuthConfig = {
   authority: process.env.REACT_APP_AUTHORITY,
@@ -18,7 +17,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider {...cognitoAuthConfig}>
-      <RouterProvider router={Routes} />
+      <App />
     </AuthProvider>
   </React.StrictMode>
 );

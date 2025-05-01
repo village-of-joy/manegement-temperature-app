@@ -6,6 +6,7 @@ import BluetoothComponent from './conectedBluetooth';
 import Ror from './Ror';
 import { uploadJsonToS3 } from '../constants/upload'
 import { useAuth } from 'react-oidc-context';
+import { fetchJsonFromS3 } from '../constants/getObject';
 
 const Dashboard = () => {
   const [data, setData] = useState(createInitialData('温度 (°C)', 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.2)'));
@@ -13,7 +14,7 @@ const Dashboard = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [currentTemperature, setCurrentTemperature] = useState(0);
-  const [jsonData, setJsonData] = useState([]);
+  const [fetchData, setFetchData] = useState([]);
   const [markedPoints, setMarkedPoints] = useState([]);
 
   const auth = useAuth();
@@ -106,6 +107,8 @@ const Dashboard = () => {
     setIsRunning(true);
   };
 
+
+
   // データ取得終了ボタンのハンドラー
   const stopRecording = () => {
     setIsRunning(false);
@@ -115,7 +118,6 @@ const Dashboard = () => {
       time: label,
       temperature: recordedData.datasets[0].data[index],
     }));
-    setJsonData(jsonData);
 
     // チェックポイントデータを統合
     const finalJsonData = {
@@ -128,7 +130,11 @@ const Dashboard = () => {
 
     // 入力がキャンセルされた場合
     if (!userFileName) {
-      userFileName = `recording_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+      const now = new Date();
+      const jpNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const datePart = jpNow.toISOString().slice(2, 10).replace(/-/g,'');
+      const timePart = jpNow.toISOString().slice(11, 19).replace(/:/g, '');
+      userFileName = `recording_${datePart}_${timePart}`
     }
 
     // ファイル名を`recoding_YYYYMMDD_HHMMSS.json`形式で自動生成
@@ -149,6 +155,22 @@ const Dashboard = () => {
       console.log('印は2つまでしか追加できません');
     }
   };
+
+  const handleFetchData = async () => {
+    try {
+      const data = await fetchJsonFromS3("test", "サンプル.json");
+      if (data) {
+        // データをログに直接出力（stateではなく取得したデータを使用）
+        setFetchData(data);
+        console.log("取得したデータ:", data);
+      } else {
+        console.error("データが取得できませんでした");
+        return null;
+      }
+    } catch (error) {
+      console.error("データ取得中にエラーが発生しました:", error);
+    }
+  }
 
   return (
     <div className="dashboard">
@@ -181,7 +203,8 @@ const Dashboard = () => {
       </div>
       {/* 記録されたデータのグラフ */}
       <div className='Recorded-data-container'>
-        <RecordedTemperatureGraph jsonData={jsonData} />
+        <button onClick={handleFetchData}>データ取得</button>
+        <RecordedTemperatureGraph jsonData={fetchData} />
       </div>
     </div>
   );
